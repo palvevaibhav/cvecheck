@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CVE Security AI Analyst</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root{--bg:#060a10;--bg2:#0a0f18;--bg3:#131b2b;--bd:#1a2540;--ac:#00ff88;--acd:rgba(0,255,136,.1);--crit:#ff3355;--critbg:rgba(255,51,85,.1);--hi:#ff8833;--hibg:rgba(255,136,51,.1);--med:#ffcc00;--medbg:rgba(255,204,0,.1);--lo:#00ccaa;--lobg:rgba(0,204,170,.1);--inf:#3399ff;--infbg:rgba(51,153,255,.1);--pur:#b366ff;--purbg:rgba(179,102,255,.1);--t1:#e4eaf2;--t2:#8494ad;--t3:#3e5068;--mono:'JetBrains Mono',monospace;--ui:'Space Grotesk',sans-serif}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--ui);background:var(--bg);color:var(--t1);height:100vh;overflow:hidden;display:flex;flex-direction:column}
+.gbg{position:fixed;inset:0;background-image:linear-gradient(rgba(0,255,136,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,136,.02) 1px,transparent 1px);background-size:50px 50px;pointer-events:none;z-index:0}
+.gl{position:fixed;border-radius:50%;filter:blur(120px);pointer-events:none;z-index:0}
+.g1{width:500px;height:500px;top:-150px;left:-100px;background:rgba(0,255,136,.04)}
+.g2{width:400px;height:400px;bottom:-100px;right:-50px;background:rgba(51,153,255,.03)}
+header{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:10px 20px;background:rgba(10,15,24,.92);border-bottom:1px solid var(--bd);backdrop-filter:blur(12px);flex-shrink:0}
+.logo{display:flex;align-items:center;gap:10px}
+.li{width:34px;height:34px;background:var(--acd);border:1px solid rgba(0,255,136,.3);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--ac);font-size:14px}
+.logo h1{font-size:14px;font-weight:700}
+.logo span{font-size:10px;color:var(--t3);font-family:var(--mono)}
+.hr{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.bdg{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:16px;font-size:10px;font-family:var(--mono)}
+.bg-g{background:var(--acd);border:1px solid rgba(0,255,136,.2);color:var(--ac)}
+.bg-i{background:var(--infbg);border:1px solid rgba(51,153,255,.2);color:var(--inf)}
+.bg-p{background:var(--purbg);border:1px solid rgba(179,102,255,.2);color:var(--pur)}
+.pd{width:5px;height:5px;background:var(--ac);border-radius:50%;animation:pu 2s infinite}
+@keyframes pu{0%,100%{box-shadow:0 0 0 0 var(--acd)}50%{box-shadow:0 0 0 5px transparent;opacity:.7}}
+.mn{position:relative;z-index:1;flex:1;display:flex;overflow:hidden}
+.cp{flex:1;display:flex;flex-direction:column;border-right:1px solid var(--bd);min-width:0}
+.cm{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:14px}
+.cm::-webkit-scrollbar{width:5px}.cm::-webkit-scrollbar-thumb{background:var(--bd);border-radius:3px}
+.msg{display:flex;gap:10px;max-width:92%;animation:mi .3s ease-out}
+.msg.u{align-self:flex-end;flex-direction:row-reverse}
+@keyframes mi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.av{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;margin-top:2px}
+.msg.ai .av{background:var(--acd);border:1px solid rgba(0,255,136,.2);color:var(--ac)}
+.msg.u .av{background:var(--infbg);border:1px solid rgba(51,153,255,.2);color:var(--inf)}
+.mb{border-radius:12px;padding:13px 15px;font-size:13px;line-height:1.7;max-width:100%;overflow:hidden}
+.msg.u .mb{background:rgba(19,34,56,.8);border:1px solid rgba(51,153,255,.1);border-top-right-radius:4px}
+.msg.ai .mb{background:rgba(17,25,32,.9);border:1px solid var(--bd);border-top-left-radius:4px;width:100%}
+.mb h2{font-size:14px;font-weight:700;margin:12px 0 6px;display:flex;align-items:center;gap:7px}
+.mb h2:first-child{margin-top:0}
+.mb h3{font-size:12px;font-weight:600;margin:8px 0 5px;color:var(--ac)}
+.mb p{margin:3px 0;color:var(--t2);font-size:12.5px}
+.mb strong{color:var(--t1);font-weight:600}
+.mb ul,.mb ol{margin:5px 0;padding-left:18px;color:var(--t2)}
+.mb li{margin:2px 0;font-size:12.5px}
+.mb code{font-family:var(--mono);background:rgba(0,0,0,.4);padding:1px 5px;border-radius:3px;font-size:11px;color:var(--ac);border:1px solid rgba(0,255,136,.08)}
+.mb pre{background:rgba(0,0,0,.4);border:1px solid var(--bd);border-radius:7px;padding:10px;margin:7px 0;overflow-x:auto}
+.mb pre code{background:none;border:none;padding:0;color:var(--t2);font-size:11px;line-height:1.5}
+.sb{display:inline-block;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+.sb-c{background:var(--critbg);color:var(--crit);border:1px solid rgba(255,51,85,.2)}
+.sb-h{background:var(--hibg);color:var(--hi);border:1px solid rgba(255,136,51,.2)}
+.sb-m{background:var(--medbg);color:var(--med);border:1px solid rgba(255,204,0,.2)}
+.sb-l{background:var(--lobg);color:var(--lo);border:1px solid rgba(0,204,170,.2)}
+.tg{display:inline-block;padding:2px 7px;border-radius:4px;font-family:var(--mono);font-size:10px;margin:1px 3px 1px 0}
+.tg-f{background:var(--acd);color:var(--ac);border:1px solid rgba(0,255,136,.12)}
+.tg-a{background:var(--critbg);color:var(--crit);border:1px solid rgba(255,51,85,.12)}
+.tg-l{background:var(--infbg);color:var(--inf);border:1px solid rgba(51,153,255,.12)}
+.tg-s{background:var(--medbg);color:var(--med);border:1px solid rgba(255,204,0,.12)}
+.tg-t{background:var(--purbg);color:var(--pur);border:1px solid rgba(179,102,255,.15)}
+.tg-osv{background:var(--acd);color:var(--ac);border:1px solid rgba(0,255,136,.15)}
+.tg-nvd{background:var(--infbg);color:var(--inf);border:1px solid rgba(51,153,255,.15)}
+.dr{border:none;border-top:1px solid var(--bd);margin:10px 0}
+.rt{width:100%;border-collapse:collapse;margin:6px 0;font-size:11px}
+.rt th{text-align:left;padding:5px 8px;background:rgba(0,0,0,.3);color:var(--t3);font-weight:600;border:1px solid var(--bd);font-size:10px}
+.rt td{padding:5px 8px;border:1px solid var(--bd);color:var(--t2);font-size:11px}
+.mc{background:rgba(0,0,0,.25);border:1px solid rgba(179,102,255,.15);border-radius:8px;padding:12px;margin:8px 0}
+.mch{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.mct{font-size:13px;font-weight:700;color:var(--pur);display:flex;align-items:center;gap:6px}
+.mu{padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700;text-transform:uppercase;font-family:var(--mono)}
+.mu-i{background:var(--critbg);color:var(--crit);border:1px solid rgba(255,51,85,.2)}
+.mu-h{background:var(--hibg);color:var(--hi);border:1px solid rgba(255,136,51,.2)}
+.mu-m{background:var(--medbg);color:var(--med);border:1px solid rgba(255,204,0,.2)}
+.mst{list-style:none;padding:0;margin:0}
+.mst li{display:flex;gap:8px;align-items:flex-start;padding:4px 0;font-size:12px;color:var(--t2)}
+.msn{width:18px;height:18px;border-radius:4px;background:var(--purbg);color:var(--pur);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;font-family:var(--mono);flex-shrink:0;margin-top:1px}
+.mcb{background:rgba(0,0,0,.3);border:1px solid var(--bd);border-radius:5px;padding:8px;margin:6px 0;font-family:var(--mono);font-size:10.5px;color:var(--t2);line-height:1.55;white-space:pre-wrap;overflow-x:auto}
+.cia{padding:14px 20px;border-top:1px solid var(--bd);background:rgba(10,15,24,.85);backdrop-filter:blur(8px);flex-shrink:0}
+.ciw{display:flex;gap:8px;align-items:flex-end}
+.ci{flex:1;background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:10px 14px;color:var(--t1);font-family:var(--ui);font-size:13px;outline:none;resize:none;max-height:100px;min-height:40px;line-height:1.5;transition:border-color .3s}
+.ci:focus{border-color:var(--ac);box-shadow:0 0 0 3px var(--acd)}
+.ci::placeholder{color:var(--t3)}
+.sbtn{width:40px;height:40px;border-radius:8px;background:var(--ac);border:none;color:var(--bg);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .3s;flex-shrink:0}
+.sbtn:hover{box-shadow:0 0 16px rgba(0,255,136,.4);transform:scale(1.05)}
+.sbtn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+.qr{display:flex;gap:5px;margin-top:7px;flex-wrap:wrap}
+.qc{padding:3px 10px;background:transparent;border:1px solid var(--bd);border-radius:14px;font-size:10px;font-family:var(--mono);color:var(--t2);cursor:pointer;transition:all .2s}
+.qc:hover{border-color:var(--ac);color:var(--ac);background:var(--acd)}
+.qc.pp{border-color:rgba(179,102,255,.3);color:var(--pur)}
+.qc.pp:hover{background:var(--purbg);border-color:var(--pur)}
+.qc.bb{border-color:rgba(51,153,255,.3);color:var(--inf)}
+.qc.bb:hover{background:var(--infbg);border-color:var(--inf)}
+.dp{width:420px;display:flex;flex-direction:column;flex-shrink:0;background:var(--bg2)}
+.dts{display:flex;border-bottom:1px solid var(--bd);flex-shrink:0}
+.dt{flex:1;padding:9px;text-align:center;font-size:11px;font-weight:600;color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
+.dt:hover{color:var(--t2)}
+.dt.on{color:var(--ac);border-bottom-color:var(--ac)}
+.dt.onp{color:var(--pur);border-bottom-color:var(--pur)}
+.dt.onb{color:var(--inf);border-bottom-color:var(--inf)}
+.dc{flex:1;overflow:hidden;display:flex;flex-direction:column}
+.tp{display:none;padding:14px;flex:1;overflow-y:auto}
+.tp.on{display:block}
+.tp::-webkit-scrollbar{width:4px}.tp::-webkit-scrollbar-thumb{background:var(--bd);border-radius:2px}
+.si{display:flex;align-items:center;gap:9px;padding:8px 10px;background:var(--bg3);border:1px solid var(--bd);border-radius:7px;transition:all .3s;margin-bottom:5px}
+.si.hit-o{border-color:var(--ac);box-shadow:0 0 10px var(--acd)}
+.si.hit-n{border-color:var(--inf);box-shadow:0 0 10px var(--infbg)}
+.sr{width:22px;height:22px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;font-family:var(--mono);flex-shrink:0}
+.sr1{background:var(--acd);color:var(--ac);border:1px solid rgba(0,255,136,.3)}
+.sr2{background:var(--infbg);color:var(--inf);border:1px solid rgba(51,153,255,.3)}
+.sr3{background:var(--hibg);color:var(--hi);border:1px solid rgba(255,136,51,.3)}
+.sr4{background:var(--medbg);color:var(--med);border:1px solid rgba(255,204,0,.3)}
+.sr5{background:var(--lobg);color:var(--lo);border:1px solid rgba(0,204,170,.3)}
+.sn h4{font-size:11px;font-weight:600}.sn p{font-size:9px;color:var(--t3);font-family:var(--mono)}
+.str{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin:10px 0}
+.stb{text-align:center;padding:6px 3px;background:var(--bg3);border:1px solid var(--bd);border-radius:5px}
+.stb .v{font-size:16px;font-weight:700;font-family:var(--mono)}
+.stb .l{font-size:8px;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;margin-top:1px}
+.v-c{color:var(--crit)}.v-h{color:var(--hi)}.v-m{color:var(--med)}.v-l{color:var(--lo)}.v-t{color:var(--ac)}
+.vc{background:var(--bg3);border:1px solid var(--bd);border-radius:7px;margin-bottom:6px;overflow:hidden}
+.vch{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;cursor:pointer;gap:8px}
+.vch:hover{background:rgba(255,255,255,.02)}
+.vci{font-family:var(--mono);font-size:10px;font-weight:700}
+.vcb{display:none;padding:8px 10px;border-top:1px solid var(--bd)}
+.vc.on .vcb{display:block}
+.vd{display:flex;gap:6px;margin-bottom:4px;font-size:11px}
+.vdl{color:var(--t3);min-width:50px;font-family:var(--mono);font-size:10px}
+.vfx{background:rgba(0,0,0,.3);border:1px solid var(--bd);border-radius:5px;padding:7px;margin-top:6px}
+.vfx h4{font-size:10px;color:var(--ac);margin-bottom:4px}
+.vfx p{font-size:10px;color:var(--t2)}
+.nvd-box{background:var(--bg3);border:1px solid var(--bd);border-radius:8px;padding:12px;margin-bottom:10px}
+.nvd-box label{font-size:11px;color:var(--t2);display:block;margin-bottom:6px;font-weight:600}
+.nvd-row{display:flex;gap:6px}
+.nvd-inp{flex:1;padding:8px 10px;background:rgba(0,0,0,.3);border:1px solid var(--bd);border-radius:6px;color:var(--t1);font-family:var(--mono);font-size:11px;outline:none;transition:border-color .3s}
+.nvd-inp:focus{border-color:var(--inf);box-shadow:0 0 0 2px var(--infbg)}
+.nvd-btn{padding:8px 14px;background:var(--inf);color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--ui);transition:all .2s}
+.nvd-btn:hover{opacity:.9}
+.nvd-st{font-size:10px;color:var(--t3);margin-top:6px;font-family:var(--mono)}
+.nvd-st.ok{color:var(--ac)}.nvd-st.err{color:var(--crit)}
+.nvd-info{background:var(--infbg);border:1px solid rgba(51,153,255,.15);border-radius:7px;padding:10px;margin-bottom:10px;font-size:11px;color:var(--t2);line-height:1.6}
+.nvd-info a{color:var(--inf);text-decoration:underline}
+.nvd-info ol{padding-left:16px;margin:6px 0}
+.nvd-info li{margin:3px 0}
+.jv{font-family:var(--mono);font-size:10px;line-height:1.6;white-space:pre-wrap;word-break:break-all;color:var(--t2)}
+.jk{color:var(--ac)}.js{color:#ffd166}.jn{color:var(--hi)}.jb{color:var(--inf)}.jnl{color:var(--t3)}
+.emt{text-align:center;padding:30px 16px;color:var(--t3)}
+.emt i{font-size:28px;margin-bottom:10px;display:block;opacity:.5}
+.emt h3{font-size:13px;color:var(--t2);margin-bottom:5px}
+.emt p{font-size:11px}
+.tow{position:fixed;top:60px;right:16px;z-index:999;display:flex;flex-direction:column;gap:6px}
+.tst{padding:8px 14px;background:var(--bg3);border:1px solid var(--bd);border-radius:7px;font-size:11px;display:flex;align-items:center;gap:7px;animation:sli .3s;box-shadow:0 6px 20px rgba(0,0,0,.4)}
+.tst-ok{border-left:3px solid var(--ac)}.tst-er{border-left:3px solid var(--crit)}.tst-in{border-left:3px solid var(--inf)}
+@keyframes sli{from{transform:translateX(60px);opacity:0}to{transform:translateX(0);opacity:1}}
+.cb{position:absolute;top:8px;right:8px;padding:3px 8px;background:var(--bg3);border:1px solid var(--bd);border-radius:4px;color:var(--t3);font-size:9px;font-family:var(--mono);cursor:pointer;z-index:2;transition:all .2s}
+.cb:hover{border-color:var(--ac);color:var(--ac)}
+.scl{position:fixed;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--ac),transparent);opacity:0;z-index:99;pointer-events:none}
+.scl.on{animation:scn 1s ease-out}
+@keyframes scn{0%{top:0;opacity:.6}100%{top:100%;opacity:0}}
+@media(max-width:900px){.dp{display:none}.msg{max-width:96%}}
+</style>
+</head>
+<body>
+<div class="gbg"></div><div class="gl g1"></div><div class="gl g2"></div>
+<div class="scl" id="scl"></div>
+<div class="tow" id="tow"></div>
+<header>
+  <div class="logo">
+    <div class="li"><i class="fas fa-shield-halved"></i></div>
+    <div><h1>CVE Security AI Analyst</h1><span>v5.2 // OSV + NVD (CORS proxy)</span></div>
+  </div>
+  <div class="hr">
+    <div class="bdg bg-g"><div class="pd"></div>OSV Live</div>
+    <div class="bdg bg-i" id="nvdBadge" style="opacity:.4"><i class="fas fa-key" style="font-size:9px"></i>&nbsp;NVD No Key</div>
+    <div class="bdg bg-p"><i class="fas fa-shield-virus" style="font-size:9px"></i>&nbsp;48 Mitigations</div>
+  </div>
+</header>
+<div class="mn">
+  <div class="cp">
+    <div class="cm" id="cm"></div>
+    <div class="cia">
+      <div class="ciw">
+        <textarea class="ci" id="ci" placeholder="Ask about vulnerabilities — e.g. CVE-2021-44228, analyze log4j, mitigate rce…" rows="1"></textarea>
+        <button class="sbtn" id="sb" type="button"><i class="fas fa-arrow-up"></i></button>
+      </div>
+      <div class="qr" id="qr"></div>
+    </div>
+  </div>
+  <div class="dp">
+    <div class="dts">
+      <div class="dt on" data-t="sources">Sources</div>
+      <div class="dt" data-t="vulns">Vulns</div>
+      <div class="dt" data-t="mitidb">Mitigations</div>
+      <div class="dt" data-t="json">JSON</div>
+    </div>
+    <div class="dc">
+      <div class="tp on" id="tp-sources"></div>
+      <div class="tp" id="tp-vulns"><div id="vcd"><div class="emt"><i class="fas fa-bug"></i><h3>No Query Yet</h3><p>Run a scan to see results</p></div></div></div>
+      <div class="tp" id="tp-mitidb">
+        <div style="position:relative">
+          <i class="fas fa-search" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:11px"></i>
+          <input id="mds" placeholder="Search 48 vuln types..." style="width:100%;padding:8px 10px 8px 30px;background:var(--bg3);border:1px solid var(--bd);border-radius:7px;color:var(--t1);font-family:var(--mono);font-size:11px;outline:none;margin-bottom:10px">
+        </div>
+        <div id="mdl"></div>
+      </div>
+      <div class="tp" id="tp-json" style="position:relative">
+        <button class="cb" id="cjb" type="button">Copy</button>
+        <div id="jvo"><div class="emt"><i class="fas fa-code"></i><h3>JSON Output</h3><p>Data appears here after a query</p></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // ── GLOBALS ──────────────────────────────────────────────────────────────
+  var OSV_API    = "https://api.osv.dev/v1";
+  var NVD_API    = "https://services.nvd.nist.gov/rest/json/cves/2.0";
+  var CORS_PROXY = "https://corsproxy.io/?url=";
+
+  var chatEl   = document.getElementById("cm");
+  var inputEl  = document.getElementById("ci");
+  var sendBtn  = document.getElementById("sb");
+  var scanEl   = document.getElementById("scl");
+  var toastsEl = document.getElementById("tow");
+
+  var curJson = null;
+  var lastV   = null;
+  var lastQ   = null;
+  var busy    = false;
+  var nvdKey  = localStorage.getItem("nvd_api_key") || "";
+
+  // ── CORE UTILS ───────────────────────────────────────────────────────────
+  function esc(s) {
+    if (s === null || s === undefined) return "";
+    return String(s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function toast(m, t) {
+    var d = document.createElement("div");
+    d.className = "tst tst-" + (t || "in");
+    var ic = t === "ok" ? "fa-check-circle" : t === "er" ? "fa-exclamation-circle" : "fa-info-circle";
+    d.innerHTML = '<i class="fas ' + ic + '" style="font-size:10px"></i> ' + esc(m);
+    toastsEl.appendChild(d);
+    setTimeout(function () {
+      d.style.opacity = "0"; d.style.transform = "translateX(40px)"; d.style.transition = "all .3s";
+    }, 2500);
+    setTimeout(function () { if (d.parentNode) d.remove(); }, 3000);
+  }
+
+  function scanFx() {
+    scanEl.classList.remove("on");
+    void scanEl.offsetWidth;
+    scanEl.classList.add("on");
+  }
+
+  function addMsg(role, html) {
+    var wrap = document.createElement("div");
+    wrap.className = "msg " + role;
+    var icon = role === "ai" ? "fa-robot" : "fa-user";
+    wrap.innerHTML =
+      '<div class="av"><i class="fas ' + icon + '"></i></div>' +
+      '<div class="mb">' + html + '</div>';
+    chatEl.appendChild(wrap);
+    chatEl.scrollTop = chatEl.scrollHeight;
+    return wrap;
+  }
+
+  function stream(html, cb) {
+    var el = addMsg("ai", html);
+    if (cb) setTimeout(cb, 30);
+    return el;
+  }
+
+  function muc(u) {
+    if (u === "IMMEDIATE") return "mu-i";
+    if (u === "HIGH")      return "mu-h";
+    return "mu-m";
+  }
+
+  function hlJ(obj) {
+    var raw = JSON.stringify(obj, null, 2)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    return raw.replace(
+      /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,
+      function (m) {
+        var cls = "jn";
+        if (/^"/.test(m))       cls = /:$/.test(m) ? "jk" : "js";
+        else if (/true|false/.test(m)) cls = "jb";
+        else if (/null/.test(m))       cls = "jnl";
+        return '<span class="' + cls + '">' + m + '</span>';
+      }
+    );
+  }
+
+  // ── SEVERITY HELPERS ─────────────────────────────────────────────────────
+  function sevColor(s) {
+    return s === "CRITICAL" ? "crit" : s === "HIGH" ? "hi" : s === "MEDIUM" ? "med" : "lo";
+  }
+  function sevBadge(s) {
+    var cls = s === "CRITICAL" ? "sb-c" : s === "HIGH" ? "sb-h" : s === "MEDIUM" ? "sb-m" : "sb-l";
+    return '<span class="' + cls + '">' + esc(s || "UNKNOWN") + '</span>';
+  }
+  function mkTag(cls, text) { return '<span class="tg ' + cls + '">' + esc(text) + '</span>'; }
+  function tagF(v)   { return mkTag("tg-f", v); }
+  function tagS(v)   { return mkTag("tg-s", v); }
+  function tagT(v)   { return mkTag("tg-t", v); }
+  function tagAl(v)  { return mkTag("tg-l", v); }
+  function tagOsv()  { return '<span class="tg tg-osv">OSV</span>'; }
+  function tagNvd()  { return '<span class="tg tg-nvd">NVD</span>'; }
+
+  // ── ECOSYSTEM DETECTION ──────────────────────────────────────────────────
+  var ECO = {
+    log4j:"Maven", log4j2:"Maven", spring:"Maven", "spring-core":"Maven", "spring-boot":"Maven",
+    jackson:"Maven", tomcat:"Maven", struts:"Maven", hibernate:"Maven", commons:"Maven",
+    lodash:"npm", express:"npm", axios:"npm", react:"npm", vue:"npm", angular:"npm",
+    webpack:"npm", next:"npm", moment:"npm", underscore:"npm", request:"npm",
+    jsonwebtoken:"npm", mongoose:"npm", "socket.io":"npm", semver:"npm", minimist:"npm",
+    requests:"PyPI", pyyaml:"PyPI", django:"PyPI", flask:"PyPI", pillow:"PyPI",
+    numpy:"PyPI", pandas:"PyPI", sqlalchemy:"PyPI", celery:"PyPI", fastapi:"PyPI",
+    urllib3:"PyPI", cryptography:"PyPI", jinja2:"PyPI", werkzeug:"PyPI", setuptools:"PyPI",
+    tokio:"crates.io", serde:"crates.io", actix:"crates.io",
+    openssl:"OSS-Fuzz", curl:"OSS-Fuzz"
+  };
+
+  function detEco(q) {
+    var l = q.toLowerCase().trim();
+    if (l.indexOf("cve-") === 0) return null;
+    for (var k in ECO) {
+      if (l === k || l.indexOf(k + "/") === 0 || l.indexOf(k + "-") === 0) return ECO[k];
+    }
+    for (var k2 in ECO) { if (l.indexOf(k2) !== -1) return ECO[k2]; }
+    return null;
+  }
+
+  // ── OSV HELPERS ──────────────────────────────────────────────────────────
+  function getSev(v) {
+    if (v.database_specific) {
+      var ds = v.database_specific;
+      if (ds.severity) {
+        var s = ds.severity.toUpperCase();
+        if (s.indexOf("CRITICAL") !== -1) return "CRITICAL";
+        if (s.indexOf("HIGH")     !== -1) return "HIGH";
+        if (s.indexOf("MEDIUM")   !== -1 || s.indexOf("MODERATE") !== -1) return "MEDIUM";
+        if (s.indexOf("LOW")      !== -1) return "LOW";
+      }
+      if (ds.cvss) {
+        var n = parseFloat(ds.cvss.score || ds.cvss);
+        if (!isNaN(n)) {
+          if (n >= 9) return "CRITICAL";
+          if (n >= 7) return "HIGH";
+          if (n >= 4) return "MEDIUM";
+          return "LOW";
+        }
+      }
+    }
+    if (v.severity && v.severity.length) {
+      for (var i = 0; i < v.severity.length; i++) {
+        var ss = (v.severity[i].score || "").toUpperCase();
+        if (ss.indexOf("CRITICAL") !== -1) return "CRITICAL";
+        if (ss.indexOf("HIGH")     !== -1) return "HIGH";
+        if (ss.indexOf("MEDIUM")   !== -1 || ss.indexOf("MODERATE") !== -1) return "MEDIUM";
+        if (ss.indexOf("LOW")      !== -1) return "LOW";
+        var nn = parseFloat(v.severity[i].score);
+        if (!isNaN(nn)) {
+          if (nn >= 9) return "CRITICAL";
+          if (nn >= 7) return "HIGH";
+          if (nn >= 4) return "MEDIUM";
+          return "LOW";
+        }
+      }
+    }
+    return "UNKNOWN";
+  }
+
+  function getPkg(v) { return (v.affected && v.affected[0]) ? v.affected[0] : null; }
+
+  function getFixV(v) {
+    var f = [];
+    if (!v.affected) return f;
+    for (var i = 0; i < v.affected.length; i++) {
+      var a = v.affected[i];
+      if (!a.ranges) continue;
+      for (var j = 0; j < a.ranges.length; j++) {
+        var r = a.ranges[j];
+        if (!r.events) continue;
+        for (var k = 0; k < r.events.length; k++) {
+          if (r.events[k].fixed) f.push(r.events[k].fixed);
+        }
+      }
+    }
+    return f;
+  }
+
+  function fixCmds(v, nm) {
+    var p = getPkg(v);
+    var eco = (p && p.package) ? p.package.ecosystem : "";
+    var fv  = getFixV(v);
+    var c   = [];
+    if (fv.length) {
+      var ver = fv[0];
+      if      (eco === "npm")       c.push("npm install " + nm + "@" + ver, "npm audit fix");
+      else if (eco === "PyPI")      c.push("pip install --upgrade " + nm + "==" + ver);
+      else if (eco === "Maven")     c.push("mvn versions:use-latest-releases -Dincludes=" + nm);
+      else if (eco === "crates.io") c.push("cargo update -p " + nm);
+      else if (eco === "Go")        c.push("go get " + nm + "@" + ver);
+      else                          c.push("Upgrade to " + ver + " or later");
+    } else {
+      c.push("No fixed version available – review advisory");
+    }
+    return c;
+  }
+
+  // ── NVD HELPERS ──────────────────────────────────────────────────────────
+  function nvdSev(cvss) {
+    if (!cvss) return "UNKNOWN";
+    var s = cvss.baseSeverity;
+    if (s === "CRITICAL") return "CRITICAL";
+    if (s === "HIGH")     return "HIGH";
+    if (s === "MEDIUM")   return "MEDIUM";
+    if (s === "LOW")      return "LOW";
+    var sc = parseFloat(cvss.baseScore);
+    if (sc >= 9) return "CRITICAL";
+    if (sc >= 7) return "HIGH";
+    if (sc >= 4) return "MEDIUM";
+    return "LOW";
+  }
+
+  function nvdDesc(cve) {
+    if (!cve.descriptions) return null;
+    for (var i = 0; i < cve.descriptions.length; i++)
+      if (cve.descriptions[i].lang === "en") return cve.descriptions[i].value;
+    return null;
+  }
+
+  function nvdRefs(cve) {
+    if (!cve.references) return [];
+    return cve.references.map(function (r) {
+      return { url: r.url, type: (r.tags && r.tags[0]) ? r.tags[0] : "OTHER" };
+    });
+  }
+
+  function nvdCwes(cve) {
+    if (!cve.weaknesses) return [];
+    var out = [];
+    for (var i = 0; i < cve.weaknesses.length; i++) {
+      var w = cve.weaknesses[i];
+      if (w.description)
+        for (var j = 0; j < w.description.length; j++)
+          out.push(w.description[j].value);
+    }
+    return out;
+  }
+
+  function nvdMetrics(cve) {
+    if (!cve.metrics) return null;
+    var v31 = cve.metrics.cvssMetricV31;
+    if (v31 && v31.length) return v31[0].cvssData;
+    var v30 = cve.metrics.cvssMetricV30;
+    if (v30 && v30.length) return v30[0].cvssData;
+    return null;
+  }
+
+  // ── NVD FETCH (via CORS proxy) ───────────────────────────────────────────
+  function fetchNVD(keyword) {
+    if (!nvdKey) return Promise.resolve(null);
+    var nvdUrl   = NVD_API + "?keywordSearch=" + encodeURIComponent(keyword) + "&resultsPerPage=20&apiKey=" + encodeURIComponent(nvdKey);
+    var proxyUrl = CORS_PROXY + encodeURIComponent(nvdUrl);
+    return fetch(proxyUrl)
+      .then(function (r) {
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return r.json();
+      })
+      .then(function (d) {
+        if (!d.vulnerabilities) return [];
+        return d.vulnerabilities.map(function (v) { return v.cve; });
+      })
+      .catch(function (e) { toast("NVD error: " + e.message, "er"); return null; });
+  }
+
+  function fetchNVDCVE(id) {
+    if (!nvdKey) return Promise.resolve(null);
+    id = id.toUpperCase().trim();
+    if (id.indexOf("CVE-") !== 0) id = "CVE-" + id;
+    var nvdUrl   = NVD_API + "?cveId=" + encodeURIComponent(id) + "&apiKey=" + encodeURIComponent(nvdKey);
+    var proxyUrl = CORS_PROXY + encodeURIComponent(nvdUrl);
+    return fetch(proxyUrl)
+      .then(function (r) {
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return r.json();
+      })
+      .then(function (d) {
+        return (d.vulnerabilities && d.vulnerabilities[0]) ? d.vulnerabilities[0].cve : null;
+      })
+      .catch(function (e) { toast("NVD error: " + e.message, "er"); return null; });
+  }
+
+  // ── OSV FETCH ────────────────────────────────────────────────────────────
+  function fetchOSV(name) {
+    var eco  = detEco(name);
+    var body = { version: "*", package: { name: name } };
+    if (eco) body.package.ecosystem = eco;
+    return fetch(OSV_API + "/query", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    })
+      .then(function (r) {
+        if (!r.ok) throw new Error("OSV HTTP " + r.status);
+        return r.json();
+      })
+      .then(function (d) { return d.vulns || []; })
+      .catch(function (e) { toast("OSV error: " + e.message, "er"); return []; });
+  }
+
+  function fetchOSVCVE(id) {
+    id = id.toUpperCase().trim();
+    if (id.indexOf("CVE-") !== 0) id = "CVE-" + id;
+    return fetch(OSV_API + "/vulns/" + id)
+      .then(function (r) {
+        if (!r.ok) throw new Error(id + " not found in OSV");
+        return r.json();
+      })
+      .then(function (d) { return [d]; })
+      .catch(function () { return []; });
+  }
+
+  // ── MITIGATION DATABASE ──────────────────────────────────────────────────
+  var MITI = [
+    {t:"Buffer Overflow",      kw:["buffer overflow","heap overflow","stack buffer","overrun"],           u:"IMMEDIATE",s:["Upgrade to patched version","Enforce strict input validation","Enable ASLR, stack canaries, NX/DEP","Use safe string libs","Compile with -fsanitize=address"],                                        c:"gcc -fstack-protector-all -D_FORTIFY_SOURCE=2 -O2 -o bin src.c"},
+    {t:"Command Injection",    kw:["command injection","os command","shell injection"],                   u:"IMMEDIATE",s:["NEVER pass user input to shell","Use parameterized APIs (list form)","Strict whitelist if shell needed","Use shlex.quote (Python)"],                                                                 c:"subprocess.run([\"ping\",\"-c\",\"1\",user_input])"},
+    {t:"SQL Injection",        kw:["sql injection","sqli"],                                               u:"IMMEDIATE",s:["Parameterized queries ALWAYS","ORM with proper query building","Input validation as defense-in-depth"],                                                                                             c:"cursor.execute(\"SELECT * FROM users WHERE id = %s\", (uid,))"},
+    {t:"RCE",                  kw:["remote code execution","rce","arbitrary code","code execution"],      u:"IMMEDIATE",s:["PATCH IMMEDIATELY","Isolate from network","Block with WAF/IPS","Least privilege"],                                                                                                                  c:"iptables -A INPUT -p tcp --dport 8080 -j DROP"},
+    {t:"XSS",                  kw:["cross-site scripting","xss","stored xss"],                           u:"HIGH",     s:["Context-aware output encoding","Content Security Policy","Auto-escaping templates","DOMPurify if needed"],                                                                                          c:"Content-Security-Policy: default-src 'self'; script-src 'self'"},
+    {t:"SSRF",                 kw:["ssrf","server-side request forgery","internal network","169.254"],    u:"HIGH",     s:["Block internal IPs","Block 169.254.169.254 metadata","URL allowlist","Network isolation"],                                                                                                          c:"BLOCKED = ['10.0.0.0/8','172.16.0.0/12','192.168.0.0/16']"},
+    {t:"Deserialization",      kw:["deserialization","unserialize","pickle","yaml.load"],                 u:"IMMEDIATE",s:["Disable unsafe deserialization","Use JSON instead","Whitelist allowed classes","HMAC on serialized data"],                                                                                           c:"import json; data = json.loads(user_input)"},
+    {t:"Path Traversal",       kw:["path traversal","directory traversal","../","lfi"],                  u:"HIGH",     s:["Normalize paths before ops","Validate within allowed dirs","Allowlists","Reject .. or null bytes"],                                                                                                  c:"if not full.startswith(BASE): raise ValueError"},
+    {t:"Auth Bypass",          kw:["authentication bypass","auth bypass","login bypass"],                 u:"IMMEDIATE",s:["Patch auth logic","Enforce MFA","Use established libs","Account lockout","Log events"],                                                                                                             c:"passport.use(new LocalStrategy(async(u,p,done)=>{...}))"},
+    {t:"Info Disclosure",      kw:["information disclosure","stack trace","debug mode","verbose error"],  u:"MEDIUM",   s:["Remove debug mode","Mask sensitive data","Generic errors to users","Remove server headers"],                                                                                                        c:"app.set('env','production'); res.status(500).json({error:'Error'});"},
+    {t:"DoS",                  kw:["denial of service","dos","resource exhaustion"],                      u:"HIGH",     s:["Rate limiting","Max request body sizes","Resource limits","CDN/reverse proxy","Circuit breakers"],                                                                                                  c:"app.use(rateLimit({windowMs:900000,max:100}));"},
+    {t:"ReDoS",                kw:["redos","regex dos","catastrophic backtracking"],                      u:"MEDIUM",   s:["Possessive/atomic quantifiers","Regex timeouts","RE2 library","Pre-compile patterns"],                                                                                                              c:"re.match(pat, inp, timeout=0.5)"},
+    {t:"Broken Crypto",        kw:["broken cryptography","weak crypto","md5","sha1"],                     u:"HIGH",     s:["Replace deprecated algorithms","AES-256-GCM","RSA-2048+","SHA-256+","Key rotation"],                                                                                                               c:"from cryptography.fernet import Fernet; key=Fernet.generate_key()"},
+    {t:"Hardcoded Credentials",kw:["hardcoded credential","hardcoded password","hardcoded key"],          u:"IMMEDIATE",s:["Remove secrets from code","Rotate exposed creds","Env vars or secret managers","Pre-commit: detect-secrets"],                                                                                      c:"os.environ['DB_PASSWORD']"},
+    {t:"Supply Chain",         kw:["supply chain","backdoor","trojanized","malicious package","xz utils"],u:"IMMEDIATE",s:["Audit with Socket.dev/Snyk","Verify provenance","Pin versions","Monitor typosquatting","SBOM"],                                                                                                    c:"npm audit && npx snyk test"},
+    {t:"Race Condition",       kw:["race condition","data race","toctou"],                                u:"HIGH",     s:["Mutexes/locks","Atomic operations","Thread-safe data structures","Message passing"],                                                                                                                c:"from threading import Lock; lock=Lock(); with lock: update()"},
+    {t:"Use-After-Free",       kw:["use-after-free","uaf","dangling pointer"],                            u:"IMMEDIATE",s:["Patch immediately","Set ptr=NULL after free","Smart pointers","Memory-safe languages"],                                                                                                             c:"free(ptr); ptr = NULL;"},
+    {t:"Integer Overflow",     kw:["integer overflow","integer underflow","wraparound"],                  u:"HIGH",     s:["Validate numeric bounds","Safe math libraries","-ftrapv -fsanitize=integer","Wider types"],                                                                                                        c:"gcc -ftrapv -fsanitize=integer -o bin src.c"},
+    {t:"XXE",                  kw:["xxe","xml external entity","xml injection"],                          u:"HIGH",     s:["Disable external entities","Safe XML libs","Prefer JSON","XSD validation"],                                                                                                                        c:"from defusedxml.ElementTree import parse; tree=parse('f.xml')"},
+    {t:"CSRF",                 kw:["csrf","cross-site request forgery"],                                  u:"MEDIUM",   s:["CSRF tokens","SameSite cookies","Verify Origin","Anti-CSRF middleware"],                                                                                                                           c:"app.use(csrf({cookie:true}))"},
+    {t:"Privilege Escalation", kw:["privilege escalation","sudo","setuid"],                               u:"IMMEDIATE",s:["Least privilege","Remove SUID/SGID","Patch software","Capabilities instead of root","Audit sudo"],                                                                                                 c:"find / -perm -4000 -type f 2>/dev/null"},
+    {t:"Memory Corruption",    kw:["memory corruption","memory leak","double free"],                      u:"IMMEDIATE",s:["Patch and upgrade","Memory sanitizers in CI","Memory-safe languages","Guard pages","Fuzz testing"],                                                                                                c:"gcc -fsanitize=address,undefined,leak -g -o bin src.c"},
+    {t:"Code Injection",       kw:["code injection","eval","dynamic code"],                               u:"IMMEDIATE",s:["NEVER eval/Function/exec","JSON.parse instead","Sandbox if needed","Static analysis"],                                                                                                            c:"JSON.parse(input)  // not eval(input)"},
+    {t:"Open Redirect",        kw:["open redirect","unvalidated redirect"],                               u:"LOW",      s:["URL allowlist","Relative paths","Reject // or http prefix"],                                                                                                                                      c:"if hostname not in ALLOWED: return '/dashboard'"},
+    {t:"Clickjacking",         kw:["clickjacking","iframe","x-frame-options"],                           u:"LOW",      s:["X-Frame-Options: DENY","frame-ancestors in CSP","Frame-busting JS"],                                                                                                                               c:"app.use(helmet.frameguard({action:'deny'}))"},
+    {t:"File Upload",          kw:["file upload","webshell","unrestricted upload"],                       u:"HIGH",     s:["Validate by magic bytes","Restrict types","Store outside web root","Antivirus scan","Size limits"],                                                                                                 c:"if magic.from_buffer(data,mime=True) not in ALLOWED: reject"},
+    {t:"Null Pointer",         kw:["null pointer","null dereference","nullptr"],                          u:"MEDIUM",   s:["Null checks before dereference","Optional types","Static analysis","Initialize at declaration"],                                                                                                   c:"if ptr != NULL: ptr->method()"},
+    {t:"Out-of-Bounds",        kw:["out-of-bounds","oob read","oob write","bounds check"],                u:"IMMEDIATE",s:["Bounds checking","Safe containers (.at())","-fsanitize=bounds","Update libraries"],                                                                                                                c:"auto val = v.at(index);"},
+    {t:"Dependency Vuln",      kw:["dependency vulnerability","npm audit","pip audit"],                   u:"VARIES",   s:["npm/pip/cargo audit","Update to patched","Lock files","Dependabot monitoring"],                                                                                                                    c:"npm audit --production && npm audit fix"},
+    {t:"Improper Access Control",kw:["improper access control","missing authorization","broken access"],  u:"IMMEDIATE",s:["Authz EVERY endpoint","Consistent middleware","Deny-by-default","Test with roles","Log denied"],                                                                                                   c:"app.use('/api/*',requireAuth)"},
+    {t:"Insecure Config",      kw:["insecure configuration","misconfiguration","default config"],         u:"HIGH",     s:["Harden before production","Disable debug/admin","Change defaults","Disable services","ScoutSuite"],                                                                                                c:"app.use(helmet({hsts:{maxAge:31536000}}))"},
+    {t:"MITM",                 kw:["man in the middle","mitm","tls downgrade"],                          u:"HIGH",     s:["HTTPS + HSTS preload","Certificate pinning","Disable TLS fallback","Strong ciphers"],                                                                                                               c:"ssl_protocols TLSv1.2 TLSv1.3"},
+    {t:"Input Validation",     kw:["input validation","no validation","unsanitized input"],               u:"HIGH",     s:["Validate ALL server-side","Strict schemas (Zod, Pydantic)","Allowlists","Type/length/format/range"],                                                                                               c:"class In(BaseModel): name:str=Field(min_length=1,max_length=100)"},
+    {t:"Weak Hashing",         kw:["weak hashing","md5","sha1","unsalted"],                              u:"HIGH",     s:["bcrypt/argon2 for passwords","SHA-256+ else","Unique salt","Work factor 12+"],                                                                                                                      c:"from argon2 import PasswordHasher; ph=PasswordHasher(); h=ph.hash(pw)"},
+    {t:"Sensitive Data Exposure",kw:["sensitive data exposure","unencrypted","pii leak"],                 u:"HIGH",     s:["Encrypt at rest (AES-256)","TLS 1.2+ in transit","Classify data","Minimize collection"],                                                                                                           c:"app.use(helmet({hsts:{maxAge:31536000}}))"},
+    {t:"Session Fixation",     kw:["session fixation","session hijacking"],                               u:"MEDIUM",   s:["Regenerate session after auth","Secure+HttpOnly+SameSite","Invalidate old","Short timeouts"],                                                                                                      c:"req.session.regenerate(()=>{...})"},
+    {t:"LDAP Injection",       kw:["ldap injection","ldap query"],                                        u:"HIGH",     s:["Parameterized queries","Escape ( ) * \\ NUL","Validate patterns","Allowlist"],                                                                                                                     c:"from ldap3.utils.conv import escape_filter_chars"},
+    {t:"Header Injection",     kw:["header injection","crlf injection","response splitting"],             u:"MEDIUM",   s:["Filter CRLF from input","Safe header APIs","Validate redirects"],                                                                                                                                  c:"function safeH(v){return v.replace(/[\\r\\n]/g,'');}"},
+    {t:"DLL Hijacking",        kw:["dll hijacking","dll side-loading","dll preloading"],                  u:"HIGH",     s:["Absolute paths","SafeDllSearchMode","Sign+verify DLLs","Monitor with ProcMon"],                                                                                                                    c:"LoadLibraryEx(L\"C:\\app\\lib.dll\",NULL,LOAD_WITH_ALTERED_SEARCH_PATH)"},
+    {t:"NoSQL Injection",      kw:["nosql injection","mongodb injection"],                                u:"HIGH",     s:["Query objects not concat","Validate inputs","Schema validation","Type check"],                                                                                                                      c:"if ObjectId.is_valid(uid): db.find({'_id':ObjectId(uid)})"},
+    {t:"Unrestricted API",     kw:["unrestricted api","no auth","open api"],                             u:"HIGH",     s:["Auth on ALL endpoints","Rate limit","API keys/OAuth2","Version + deprecate","Monitor"],                                                                                                             c:"app.use(expressjwt({secret:KEY,algorithms:['HS256']}))"},
+    {t:"Business Logic",       kw:["business logic","logic flaw","discount abuse"],                       u:"MEDIUM",   s:["Validate server-side","Idempotency keys","DB transactions","Pen-test logic"],                                                                                                                      c:"if await Order.findOne({key}): return existing"},
+    {t:"Error Handling",       kw:["error handling","stack trace","exception leak"],                       u:"LOW",      s:["Never expose stacks","Generic errors externally","Centralized middleware","Classify errors"],                                                                                                      c:"app.use((err,req,res,next)=>{res.status(500).json({error:'Error'});})"},
+    {t:"Cert Validation",      kw:["certificate validation","tls validation","verify false"],             u:"HIGH",     s:["NEVER disable verify","Proper CA bundle","Certificate pinning","Monitor expiry"],                                                                                                                  c:"requests.get(url, verify=True, timeout=10)"},
+    {t:"TOCTOU",               kw:["toctou","time of check","time of use"],                              u:"MEDIUM",   s:["Atomic operations","Lock resources","File descriptors not paths","DB transactions"],                                                                                                                c:"with open(fn) as f: data = f.read()"}
+  ];
+
+  function classifyTypes(text) {
+    var l = (text || "").toLowerCase();
+    var matched = [];
+    for (var i = 0; i < MITI.length; i++) {
+      var e = MITI[i];
+      for (var j = 0; j < e.kw.length; j++) {
+        if (l.indexOf(e.kw[j]) !== -1) {
+          var already = false;
+          for (var x = 0; x < matched.length; x++) { if (matched[x].t === e.t) { already = true; break; } }
+          if (!already) matched.push(e);
+          break;
+        }
+      }
+    }
+    return matched;
+  }
+
+  function lookupMiti(q) {
+    var lq  = q.toLowerCase();
+    var res = [];
+    for (var i = 0; i < MITI.length; i++) {
+      var e   = MITI[i];
+      var hit = e.t.toLowerCase().indexOf(lq) !== -1;
+      if (!hit) {
+        for (var j = 0; j < e.kw.length; j++) {
+          if (e.kw[j].indexOf(lq) !== -1) { hit = true; break; }
+        }
+      }
+      if (hit) res.push(e);
+    }
+    if (!res.length) {
+      var words = lq.split(/\s+/).filter(function (w) { return w.length > 2; });
+      for (var wi = 0; wi < words.length; wi++) {
+        for (var mi = 0; mi < MITI.length; mi++) {
+          var already = false;
+          for (var ri = 0; ri < res.length; ri++) { if (res[ri].t === MITI[mi].t) { already = true; break; } }
+          if (already) continue;
+          var hit2 = MITI[mi].t.toLowerCase().indexOf(words[wi]) !== -1;
+          if (!hit2) {
+            for (var ki = 0; ki < MITI[mi].kw.length; ki++) {
+              if (MITI[mi].kw[ki].indexOf(words[wi]) !== -1) { hit2 = true; break; }
+            }
+          }
+          if (hit2) res.push(MITI[mi]);
+        }
+      }
+    }
+    return res;
+  }
+
+  function mitiCard(e, label) {
+    var p = [];
+    p.push('<div class="mc">');
+    p.push('<div class="mch">');
+    p.push('<div class="mct"><i class="fas fa-shield-halved" style="font-size:11px"></i> ' + esc(e.t) + '</div>');
+    p.push('<span class="mu ' + muc(e.u) + '">' + esc(e.u) + '</span>');
+    p.push('</div>');
+    if (label) {
+      p.push('<p style="font-size:10px;color:var(--t3);margin-bottom:6px">Applied to: <span style="color:var(--ac)">' + esc(label) + '</span></p>');
+    }
+    p.push('<ol class="mst">');
+    for (var i = 0; i < e.s.length; i++) {
+      p.push('<li><span class="msn">' + (i + 1) + '</span><span>' + esc(e.s[i]) + '</span></li>');
+    }
+    p.push('</ol>');
+    if (e.c) p.push('<div class="mcb">' + esc(e.c) + '</div>');
+    p.push('</div>');
+    return p.join('');
+  }
+
+  // ── ANALYSIS RENDERERS ───────────────────────────────────────────────────
+  function nvdAnalysis(cves, q) {
+    if (!cves || !cves.length) {
+      return '<div class="emt"><i class="fas fa-exclamation-triangle" style="color:var(--crit)"></i><h3>NVD: No Results</h3><p>No CVEs found for "' + esc(q) + '"</p></div>';
+    }
+    var cr = 0, hi = 0, me = 0, lo = 0;
+    for (var i = 0; i < cves.length; i++) {
+      var m  = nvdMetrics(cves[i]);
+      var s  = m ? nvdSev(m) : "UNKNOWN";
+      if      (s === "CRITICAL") cr++;
+      else if (s === "HIGH")     hi++;
+      else if (s === "MEDIUM")   me++;
+      else                       lo++;
+    }
+    var ms   = cr ? "CRITICAL" : hi ? "HIGH" : me ? "MEDIUM" : "LOW";
+    var top  = cves[0];
+    var topM = nvdMetrics(top);
+    var topS = topM ? nvdSev(topM) : "UNKNOWN";
+
+    var p = [];
+    p.push('<h2><i class="fas fa-shield-halved" style="font-size:13px;color:var(--inf)"></i> NVD/NIST: ' + esc(q) + '</h2>');
+    p.push('<p>Found <strong>' + cves.length + '</strong> CVEs ' + tagNvd() + ' Highest: ' + sevBadge(ms) + '</p>');
+    p.push('<table class="rt"><tr><th>Severity</th><th>Count</th></tr>');
+    p.push('<tr><td>' + sevBadge("CRITICAL") + '</td><td>' + cr + '</td></tr>');
+    p.push('<tr><td>' + sevBadge("HIGH")     + '</td><td>' + hi + '</td></tr>');
+    p.push('<tr><td>' + sevBadge("MEDIUM")   + '</td><td>' + me + '</td></tr>');
+    p.push('<tr><td>' + sevBadge("LOW")      + '</td><td>' + lo + '</td></tr>');
+    p.push('</table>');
+    p.push('<hr class="dr">');
+    p.push('<h3>' + esc(top.id) + ' ' + tagNvd() + ' ' + sevBadge(topS) + '</h3>');
+
+    if (topM) {
+      var sc  = topM.baseScore || "N/A";
+      var imp = (topM.confidentialityImpact || "") + " / " + (topM.integrityImpact || "") + " / " + (topM.availabilityImpact || "");
+      p.push('<table class="rt"><tr><th>Metric</th><th>Value</th></tr>');
+      p.push('<tr><td>CVSS Score</td><td style="font-weight:700;color:var(--' + sevColor(topS) + ')">' + esc(String(sc)) + '</td></tr>');
+      p.push('<tr><td>Severity</td><td>' + sevBadge(topS) + '</td></tr>');
+      p.push('<tr><td>Vector</td><td style="font-family:var(--mono);font-size:10px">' + esc(topM.vectorString || "N/A") + '</td></tr>');
+      p.push('<tr><td>Attack Vector</td><td>' + esc(topM.attackVector || "N/A") + '</td></tr>');
+      p.push('<tr><td>Impact (C/I/A)</td><td>' + esc(imp) + '</td></tr>');
+      p.push('</table>');
+    }
+
+    var desc = nvdDesc(top);
+    if (desc) {
+      p.push('<p><strong>Description:</strong> ' + esc(desc.length > 400 ? desc.substring(0, 400) + "…" : desc) + '</p>');
+    }
+
+    var cwes = nvdCwes(top);
+    if (cwes.length) {
+      p.push('<p>CWEs: ');
+      for (var j = 0; j < cwes.length; j++) p.push(mkTag("tg-l", cwes[j]));
+      p.push('</p>');
+    }
+
+    var refs = nvdRefs(top);
+    if (refs.length) {
+      p.push('<p><strong>References:</strong></p><ul>');
+      for (var k = 0; k < Math.min(5, refs.length); k++) {
+        var rurl  = refs[k].url;
+        var rshort = rurl.length > 80 ? rurl.substring(0, 80) + "…" : rurl;
+        p.push('<li><a href="' + esc(rurl) + '" target="_blank" rel="noopener" style="color:var(--inf);font-size:11px;word-break:break-all;">' + esc(rshort) + '</a></li>');
+      }
+      p.push('</ul>');
+    }
+
+    var dt = classifyTypes(desc || top.id);
+    if (dt.length) {
+      p.push('<hr class="dr"><h3><i class="fas fa-shield-virus" style="color:var(--pur);font-size:12px"></i> Auto-Mitigation (' + dt.length + ')</h3>');
+      for (var mi2 = 0; mi2 < dt.length; mi2++) p.push(mitiCard(dt[mi2], top.id));
+    }
+
+    if (cves.length > 1) {
+      p.push('<hr class="dr"><table class="rt"><tr><th>ID</th><th>Score</th><th>Severity</th></tr>');
+      for (var v = 1; v < cves.length; v++) {
+        var vm  = nvdMetrics(cves[v]);
+        var vs2 = vm ? nvdSev(vm) : "UNKNOWN";
+        p.push('<tr>');
+        p.push('<td style="font-family:var(--mono);color:var(--inf);font-size:10px">' + esc(cves[v].id) + '</td>');
+        p.push('<td style="font-weight:700;color:var(--' + sevColor(vs2) + ')">' + esc(String(vm ? vm.baseScore : "N/A")) + '</td>');
+        p.push('<td>' + sevBadge(vs2) + '</td>');
+        p.push('</tr>');
+      }
+      p.push('</table>');
+    }
+    return p.join("");
+  }
+
+  function osvAnalysis(vs, q) {
+    if (!vs.length) {
+      return '<div class="emt"><i class="fas fa-check-circle" style="color:var(--ac)"></i><h3>OSV: No Results</h3><p>No vulnerabilities found for <strong>' + esc(q) + '</strong></p></div>';
+    }
+    var cr = 0, hi = 0, me = 0, lo = 0;
+    for (var i = 0; i < vs.length; i++) {
+      var s = getSev(vs[i]);
+      if      (s === "CRITICAL") cr++;
+      else if (s === "HIGH")     hi++;
+      else if (s === "MEDIUM")   me++;
+      else                       lo++;
+    }
+    var ms  = cr ? "CRITICAL" : hi ? "HIGH" : me ? "MEDIUM" : "LOW";
+    var top = vs[0];
+    var tp  = getPkg(top);
+
+    var p = [];
+    p.push('<h2><i class="fas fa-database" style="color:var(--ac);font-size:13px"></i> OSV.dev: ' + esc(q) + '</h2>');
+    p.push('<p>Found <strong>' + vs.length + '</strong> ' + tagOsv() + ' Highest: ' + sevBadge(ms) + '</p>');
+    p.push('<table class="rt"><tr><th>Severity</th><th>Count</th></tr>');
+    p.push('<tr><td>' + sevBadge("CRITICAL") + '</td><td>' + cr + '</td></tr>');
+    p.push('<tr><td>' + sevBadge("HIGH")     + '</td><td>' + hi + '</td></tr>');
+    p.push('<tr><td>' + sevBadge("MEDIUM")   + '</td><td>' + me + '</td></tr>');
+    p.push('<tr><td>' + sevBadge("LOW")      + '</td><td>' + lo + '</td></tr>');
+    p.push('</table>');
+
+    p.push('<hr class="dr"><h3>' + esc(top.id) + ' ' + tagOsv() + '</h3>');
+    p.push('<p><strong>' + esc(top.summary || "No summary") + '</strong></p>');
+    if (tp && tp.package) p.push('<p>Package: ' + tagS(tp.package.name) + ' ' + tagS(tp.package.ecosystem) + '</p>');
+    if (top.aliases && top.aliases.length) p.push('<p>Aliases: ' + top.aliases.map(tagAl).join("") + '</p>');
+    var fx = getFixV(top);
+    if (fx.length) p.push('<p>Fixed: ' + fx.map(tagF).join("") + '</p>');
+    var cmds = fixCmds(top, tp && tp.package ? tp.package.name : q);
+    p.push('<pre><code>' + esc(cmds.map(function (c) { return "$ " + c; }).join("\n")) + '</code></pre>');
+
+    var seen = {}, mitis = [];
+    for (var j = 0; j < vs.length; j++) {
+      var dt = classifyTypes((vs[j].details || "") + " " + (vs[j].summary || ""));
+      for (var k = 0; k < dt.length; k++) {
+        if (!seen[dt[k].t]) { seen[dt[k].t] = true; mitis.push({ e: dt[k], id: vs[j].id }); }
+      }
+    }
+    if (mitis.length) {
+      p.push('<hr class="dr"><h3><i class="fas fa-shield-virus" style="color:var(--pur);font-size:12px"></i> Auto-Mitigation (' + mitis.length + ')</h3>');
+      for (var mi = 0; mi < mitis.length; mi++) p.push(mitiCard(mitis[mi].e, mitis[mi].id));
+    }
+
+    if (vs.length > 1) {
+      p.push('<hr class="dr"><table class="rt"><tr><th>ID</th><th>Severity</th><th>Fixed</th></tr>');
+      for (var v = 1; v < vs.length; v++) {
+        var sv = getSev(vs[v]);
+        var fv = getFixV(vs[v]);
+        p.push('<tr>');
+        p.push('<td style="font-family:var(--mono);color:var(--ac);font-size:10px">' + esc(vs[v].id) + '</td>');
+        p.push('<td>' + sevBadge(sv) + '</td>');
+        p.push('<td style="font-family:var(--mono);font-size:10px">' + (fv.length ? esc(fv[0]) : '<span style="color:var(--crit)">No fix</span>') + '</td>');
+        p.push('</tr>');
+      }
+      p.push('</table>');
+    }
+    return p.join("");
+  }
+
+  function combinedAnalysis(osvVs, nvdCves, q) {
+    var oc = osvVs.length;
+    var nc = nvdCves ? nvdCves.length : 0;
+    var p  = [];
+
+    p.push('<h2><i class="fas fa-layer-group" style="color:var(--ac);font-size:13px"></i> Dual-Source: ' + esc(q) + '</h2>');
+    p.push('<table class="rt"><tr><th>Source</th><th>CVEs</th><th>Status</th></tr>');
+    p.push('<tr><td>' + tagOsv() + ' OSV.dev</td><td><strong>' + oc + '</strong></td><td style="color:var(--ac)">OK</td></tr>');
+    p.push('<tr><td>' + tagNvd() + ' NVD/NIST</td><td><strong>' + (nvdCves ? nc : "–") + '</strong></td><td style="color:' + (nvdCves ? "var(--ac)" : "var(--crit)") + '">' + (nvdCves ? "OK via CORS proxy" : "No key set") + '</td></tr>');
+    p.push('</table>');
+
+    if (!nvdKey) {
+      p.push('<div class="nvd-info"><strong>Add NVD for richer CVSS data.</strong> NVD API does not send CORS headers — we route through <code>corsproxy.io</code>. API key sent as <code>?apiKey=</code> param so it survives the proxy.<br>Free key (instant): <a href="https://nvd.nist.gov/developers/request-an-api-key" target="_blank" rel="noopener">nvd.nist.gov/developers/request-an-api-key</a></div>');
+    }
+
+    if (oc)              p.push('<hr class="dr">' + osvAnalysis(osvVs, q));
+    if (nvdCves && nc)   p.push('<hr class="dr">' + nvdAnalysis(nvdCves, q));
+    if (!oc && !nc)      p.push('<p>No vulnerabilities found in either source for <strong>' + esc(q) + '</strong>.</p>');
+    return p.join("");
+  }
+
+  // ── RIGHT PANEL UPDATE ────────────────────────────────────────────────────
+  function updatePanel(osvVs, nvdCves, q) {
+    var cr = 0, hi = 0, me = 0, lo = 0;
+    for (var i = 0; i < osvVs.length; i++) {
+      var s = getSev(osvVs[i]);
+      if      (s === "CRITICAL") cr++;
+      else if (s === "HIGH")     hi++;
+      else if (s === "MEDIUM")   me++;
+      else                       lo++;
+    }
+    if (nvdCves) {
+      for (var j = 0; j < nvdCves.length; j++) {
+        var m  = nvdMetrics(nvdCves[j]);
+        var ns = m ? nvdSev(m) : "UNKNOWN";
+        if      (ns === "CRITICAL") cr++;
+        else if (ns === "HIGH")     hi++;
+        else if (ns === "MEDIUM")   me++;
+        else                        lo++;
+      }
+    }
+    var total = osvVs.length + (nvdCves ? nvdCves.length : 0);
+    var sh    = [];
+    sh.push('<div class="str">');
+    sh.push('<div class="stb"><div class="v v-t">' + total + '</div><div class="l">Total</div></div>');
+    sh.push('<div class="stb"><div class="v v-c">' + cr    + '</div><div class="l">Crit</div></div>');
+    sh.push('<div class="stb"><div class="v v-h">' + hi    + '</div><div class="l">High</div></div>');
+    sh.push('<div class="stb"><div class="v v-m">' + me    + '</div><div class="l">Med</div></div>');
+    sh.push('<div class="stb"><div class="v v-l">' + lo    + '</div><div class="l">Low</div></div>');
+    sh.push('</div>');
+
+    // OSV cards
+    for (var ii = 0; ii < osvVs.length; ii++) {
+      var v   = osvVs[ii];
+      var sv  = getSev(v);
+      var pk  = getPkg(v);
+      var fv  = getFixV(v);
+      var dt  = classifyTypes((v.details || "") + " " + (v.summary || ""));
+      var nid = "vc-" + ii;
+      var cmd = fixCmds(v, pk && pk.package ? pk.package.name : q)[0] || "N/A";
+
+      sh.push('<div class="vc" id="' + nid + '">');
+      sh.push('<div class="vch" onclick="document.getElementById(\'' + nid + '\').classList.toggle(\'on\')">');
+      sh.push('<span class="vci" style="color:var(--ac)">' + esc(v.id) + '</span>');
+      sh.push('<div style="display:flex;gap:4px;align-items:center">' + tagOsv() + (dt.length ? tagT(dt[0].t) : "") + ' ' + sevBadge(sv) + '</div>');
+      sh.push('</div>');
+      sh.push('<div class="vcb">');
+      sh.push('<div class="vd"><span class="vdl">Summary</span><span>' + esc(v.summary || "N/A") + '</span></div>');
+      if (fv.length) sh.push('<div class="vd"><span class="vdl">Fixed</span><span>' + fv.map(tagF).join("") + '</span></div>');
+      sh.push('<div class="vfx"><h4><i class="fas fa-shield-halved" style="font-size:9px"></i> Fix</h4><p><code>' + esc(cmd) + '</code></p></div>');
+      sh.push('</div></div>');
+    }
+
+    // NVD cards
+    if (nvdCves) {
+      for (var jj = 0; jj < nvdCves.length; jj++) {
+        var nc2  = nvdCves[jj];
+        var nm2  = nvdMetrics(nc2);
+        var ns2  = nm2 ? nvdSev(nm2) : "UNKNOWN";
+        var nd2  = nvdDesc(nc2);
+        var ndt2 = classifyTypes(nd2 || nc2.id);
+        var ncid = "vnc-" + jj;
+        var score2 = nm2 ? nm2.baseScore : null;
+
+        sh.push('<div class="vc" id="' + ncid + '">');
+        sh.push('<div class="vch" onclick="document.getElementById(\'' + ncid + '\').classList.toggle(\'on\')">');
+        sh.push('<span class="vci" style="color:var(--inf)">' + esc(nc2.id) + '</span>');
+        sh.push('<div style="display:flex;gap:4px;align-items:center">' + tagNvd() + (ndt2.length ? tagT(ndt2[0].t) : "") + ' ' + sevBadge(ns2) + (score2 ? ' <span class="tg tg-s" style="font-weight:700">Score: ' + esc(String(score2)) + '</span>' : "") + '</div>');
+        sh.push('</div>');
+        sh.push('<div class="vcb">');
+        sh.push('<div class="vd"><span class="vdl">Desc</span><span>' + esc(nd2 ? nd2.substring(0, 150) : "N/A") + '</span></div>');
+        if (nm2) sh.push('<div class="vd"><span class="vdl">Vector</span><span style="font-family:var(--mono);font-size:9px">' + esc(nm2.vectorString || "") + '</span></div>');
+        sh.push('</div></div>');
+      }
+    }
+
+    document.getElementById("vcd").innerHTML = sh.join("");
+
+    // Build JSON output
+    var jsonData = { query: q, queried_at: new Date().toISOString(), sources: {} };
+    if (osvVs.length) {
+      jsonData.sources["OSV.dev"] = {
+        source_rank: 1, source_type: "OSV.dev",
+        vulnerabilities: osvVs.map(function (v2) {
+          var pk2 = getPkg(v2);
+          return {
+            id:            v2.id,
+            severity:      getSev(v2),
+            summary:       v2.summary || null,
+            package:       pk2 ? { name: pk2.package ? pk2.package.name : null, ecosystem: pk2.package ? pk2.package.ecosystem : null } : null,
+            fixed_versions:getFixV(v2),
+            fix_commands:  fixCmds(v2, pk2 && pk2.package ? pk2.package.name : q),
+            aliases:       v2.aliases || [],
+            references:    (v2.references || []).map(function (r) { return { type: r.type, url: r.url }; })
+          };
+        })
+      };
+    }
+    if (nvdCves && nvdCves.length) {
+      jsonData.sources["NVD/NIST"] = {
+        source_rank: 2, source_type: "NVD/NIST",
+        vulnerabilities: nvdCves.map(function (c2) {
+          var m2 = nvdMetrics(c2);
+          return {
+            id:          c2.id,
+            severity:    m2 ? nvdSev(m2) : "UNKNOWN",
+            cvss_score:  m2 ? m2.baseScore : null,
+            cvss_vector: m2 ? m2.vectorString : null,
+            description: nvdDesc(c2),
+            cwes:        nvdCwes(c2),
+            references:  nvdRefs(c2).map(function (r) { return { type: r.type, url: r.url }; })
+          };
+        })
+      };
+    }
+    curJson = jsonData;
+    document.getElementById("jvo").innerHTML = '<div class="jv">' + hlJ(curJson) + '</div>';
+
+    // Highlight source badges
+    var srcEls = document.querySelectorAll("#tp-sources .si");
+    for (var si = 0; si < srcEls.length; si++) srcEls[si].classList.remove("hit-o", "hit-n");
+    var osvSi = document.getElementById("si-osv");
+    var nvdSi = document.getElementById("si-nvd");
+    if (osvSi && osvVs.length)          osvSi.classList.add("hit-o");
+    if (nvdSi && nvdCves && nvdCves.length) nvdSi.classList.add("hit-n");
+  }
+
+  // ── SOURCES PANEL ─────────────────────────────────────────────────────────
+  function renderSources() {
+    var keyPreview = nvdKey ? ('<i class="fas fa-check-circle"></i> Key saved (' + esc(nvdKey.substring(0, 8)) + '…)') : '<i class="fas fa-info-circle"></i> No key – NVD disabled';
+    var p = [];
+    p.push('<div class="nvd-box">');
+    p.push('<label><i class="fas fa-key" style="font-size:10px"></i> NVD API Key (free, instant)</label>');
+    p.push('<div class="nvd-row">');
+    p.push('<input class="nvd-inp" id="nvdKeyInput" type="password" placeholder="Paste NVD API key…" value="' + esc(nvdKey) + '">');
+    p.push('<button class="nvd-btn" id="nvdKeyBtn" type="button">Save</button>');
+    p.push('</div>');
+    p.push('<div class="nvd-st' + (nvdKey ? " ok" : "") + '" id="nvdKeyStatus">' + keyPreview + '</div>');
+    p.push('</div>');
+    p.push('<div class="nvd-info">');
+    p.push('<strong>Why CORS proxy:</strong> NVD API does not send CORS headers. Browser blocks it. We route through <code>corsproxy.io</code>. API key sent as <code>?apiKey=</code> (not header) so it survives.<br>');
+    p.push('Free key: <a href="https://nvd.nist.gov/developers/request-an-api-key" target="_blank" rel="noopener">nvd.nist.gov/developers/request-an-api-key</a>');
+    p.push('</div>');
+    p.push('<div class="si hit-o" id="si-osv"><div class="sr sr1">#1</div><div class="sn"><h4>OSV.dev</h4><p>Free · no key · CORS OK</p></div></div>');
+    p.push('<div class="si" id="si-nvd"><div class="sr sr2">#2</div><div class="sn"><h4>NVD / NIST</h4><p>' + (nvdKey ? "Key set – via CORS proxy" : "Requires free API key") + '</p></div></div>');
+    p.push('<div class="si"><div class="sr sr3">#3</div><div class="sn"><h4>GitHub Advisory</h4><p>Via OSV aggregate</p></div></div>');
+    p.push('<div class="si"><div class="sr sr4">#4</div><div class="sn"><h4>PyPI / RustSec / Go</h4><p>Via OSV aggregate</p></div></div>');
+    p.push('<div class="si"><div class="sr sr5">#5</div><div class="sn"><h4>Distro DBs</h4><p>Ubuntu, Debian, Red Hat</p></div></div>');
+    document.getElementById("tp-sources").innerHTML = p.join("");
+
+    document.getElementById("nvdKeyBtn").addEventListener("click", function () {
+      var k = document.getElementById("nvdKeyInput").value.trim();
+      if (k) {
+        nvdKey = k;
+        localStorage.setItem("nvd_api_key", k);
+        document.getElementById("nvdKeyStatus").className = "nvd-st ok";
+        document.getElementById("nvdKeyStatus").innerHTML = '<i class="fas fa-check-circle"></i> Key saved';
+        document.getElementById("nvdBadge").style.opacity = "1";
+        document.getElementById("nvdBadge").innerHTML = '<div class="pd"></div>&nbsp;NVD Ready';
+        toast("NVD API key saved", "ok");
+      } else {
+        nvdKey = "";
+        localStorage.removeItem("nvd_api_key");
+        document.getElementById("nvdKeyStatus").className = "nvd-st err";
+        document.getElementById("nvdKeyStatus").innerHTML = '<i class="fas fa-times-circle"></i> Key removed';
+        document.getElementById("nvdBadge").style.opacity = ".4";
+        document.getElementById("nvdBadge").innerHTML = '<i class="fas fa-key" style="font-size:9px"></i>&nbsp;NVD No Key';
+        toast("NVD key removed", "in");
+      }
+      renderSources();
+    });
+  }
+  renderSources();
+
+  // ── MITIGATION DB PANEL ───────────────────────────────────────────────────
+  function renderMitiDB(f) {
+    var items = f ? lookupMiti(f) : MITI;
+    var el    = document.getElementById("mdl");
+    if (!items.length) { el.innerHTML = '<div class="emt"><i class="fas fa-search"></i><h3>No Match</h3></div>'; return; }
+    var h = "";
+    for (var i = 0; i < Math.min(20, items.length); i++) {
+      var e = items[i];
+      h += '<div style="background:var(--bg3);border:1px solid var(--bd);border-radius:7px;padding:10px;margin-bottom:6px">';
+      h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">';
+      h += '<div style="font-size:11px;font-weight:700;color:var(--pur)">' + esc(e.t) + '</div>';
+      h += '<span class="mu ' + muc(e.u) + '" style="font-size:8px">' + esc(e.u) + '</span>';
+      h += '</div><ul style="font-size:10px;color:var(--t2);line-height:1.6;padding-left:16px;margin:0">';
+      for (var j = 0; j < Math.min(3, e.s.length); j++) h += '<li>' + esc(e.s[j]) + '</li>';
+      if (e.s.length > 3) h += '<li style="color:var(--t3)">+' + (e.s.length - 3) + ' more…</li>';
+      h += '</ul></div>';
+    }
+    el.innerHTML = h;
+  }
+  renderMitiDB();
+  document.getElementById("mds").addEventListener("input", function (e) { renderMitiDB(e.target.value); });
+
+  // ── QUICK CHIPS ───────────────────────────────────────────────────────────
+  var chips = [
+    { q:"analyze log4j",          l:"log4j"          },
+    { q:"CVE-2021-44228",         l:"CVE-2021-44228"  },
+    { q:"scan lodash",            l:"lodash"          },
+    { q:"CVE-2024-3094",          l:"CVE-2024-3094"   },
+    { q:"analyze express",        l:"express"         },
+    { q:"nvd log4j",              l:"NVD log4j",       bb:true },
+    { q:"nvd spring",             l:"NVD spring",      bb:true },
+    { q:"nvd openssl",            l:"NVD openssl",     bb:true },
+    { q:"mitigate rce",           l:"mitigate RCE",    pp:true },
+    { q:"mitigate sql injection", l:"SQLi",            pp:true },
+    { q:"mitigate xss",           l:"XSS",             pp:true },
+    { q:"mitigate buffer overflow",l:"Buffer Overflow",pp:true },
+    { q:"mitigate deserialization",l:"Deserialization",pp:true },
+    { q:"mitigate ssrf",          l:"SSRF",            pp:true }
+  ];
+  var qrEl = document.getElementById("qr");
+  for (var ci = 0; ci < chips.length; ci++) {
+    (function (q) {
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "qc" + (chips.find ? "" : "") + (q === chips[ci] ? "" : "");
+      // re-derive class from chip object
+    })(chips[ci].q);
+  }
+  // Cleaner chip creation:
+  qrEl.innerHTML = "";
+  chips.forEach(function (chip) {
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "qc" + (chip.pp ? " pp" : chip.bb ? " bb" : "");
+    btn.textContent = chip.l;
+    btn.addEventListener("click", function () { inputEl.value = chip.q; doHandle(chip.q); });
+    qrEl.appendChild(btn);
+  });
+
+  // ── TABS ──────────────────────────────────────────────────────────────────
+  function switchTab(n) {
+    document.querySelectorAll(".dt").forEach(function (t) { t.classList.remove("on", "onp", "onb"); });
+    document.querySelectorAll(".tp").forEach(function (t) { t.classList.remove("on"); });
+    var tab  = document.querySelector('[data-t="' + n + '"]');
+    var pane = document.getElementById("tp-" + n);
+    if (tab)  tab.classList.add(n === "mitidb" ? "onp" : n === "json" ? "onb" : "on");
+    if (pane) pane.classList.add("on");
+  }
+  document.querySelectorAll(".dt").forEach(function (t) {
+    t.addEventListener("click", function () { switchTab(this.getAttribute("data-t")); });
+  });
+  document.getElementById("cjb").addEventListener("click", function () {
+    if (!curJson) { toast("No data yet", "in"); return; }
+    navigator.clipboard.writeText(JSON.stringify(curJson, null, 2))
+      .then(function () { toast("Copied!", "ok"); })
+      .catch(function () { toast("Copy failed", "er"); });
+  });
+
+  // ── INTENT DETECTION ─────────────────────────────────────────────────────
+  function getIntent(msg) {
+    var m = msg.toLowerCase().trim();
+    if (/^cve-\d{4}-\d+/i.test(m)) return "cve";
+    if (m.indexOf("nvd ") === 0)    return "nvd";
+    if (/^(mitigate|remediate|fix|how to (fix|prevent|mitigate|remediate|stop|protect|defend))\s/i.test(m)) return "mitigate";
+    if (/^(analyze|check|scan|vulns? in|vulnerabilities? in|search|find|show)\s/i.test(m)) return "scan";
+    if (lastV) return "followup";
+    return "scan";
+  }
+
+  // ── MAIN HANDLER ─────────────────────────────────────────────────────────
+  function doHandle(text) {
+    var msg = (text || "").trim();
+    if (!msg || busy) return;
+
+    addMsg("u", "<p>" + esc(msg) + "</p>");
+    inputEl.value = "";
+    inputEl.style.height = "auto";
+    sendBtn.disabled = true;
+    busy = true;
+    scanFx();
+
+    function done() { sendBtn.disabled = false; busy = false; }
+
+    var intent = getIntent(msg);
+
+    // ── Mitigation intent ─────────────────────────────────────────────────
+    if (intent === "mitigate") {
+      var mq    = msg.replace(/^(mitigate|remediate|fix|how to (fix|prevent|mitigate|remediate|stop|protect|defend))\s*/i, "").trim().replace(/[?!.]/g, "");
+      var types = lookupMiti(mq);
+      var h     = [];
+      h.push('<h2><i class="fas fa-shield-virus" style="color:var(--pur);font-size:13px"></i> Auto-Mitigation: ' + esc(mq) + '</h2>');
+      if (types.length) {
+        h.push('<p>Found <strong>' + types.length + '</strong> rule' + (types.length > 1 ? "s" : "") + '</p>');
+        for (var ti = 0; ti < types.length; ti++) h.push(mitiCard(types[ti]));
+      } else {
+        h.push('<p>No specific mitigation rule matched. Try: <code>rce</code>, <code>xss</code>, <code>sql injection</code>, <code>buffer overflow</code>…</p>');
+      }
+      stream(h.join(""), function () {
+        switchTab("mitidb");
+        document.getElementById("mds").value = mq;
+        renderMitiDB(mq);
+        done();
+      });
+      return;
+    }
+
+    // ── CVE lookup ────────────────────────────────────────────────────────
+    if (intent === "cve") {
+      var m2    = msg.match(/CVE-\d{4}-\d+/i);
+      var cveId = m2 ? m2[0].toUpperCase() : msg.toUpperCase();
+      lastQ     = cveId;
+      stream('<p style="color:var(--t3);font-size:12px"><i class="fas fa-spinner fa-spin" style="margin-right:5px"></i>Looking up ' + esc(cveId) + ' in OSV' + (nvdKey ? " + NVD" : "") + '…</p>', function () {});
+      Promise.all([fetchOSVCVE(cveId), fetchNVDCVE(cveId)]).then(function (results) {
+        var osvVs  = results[0] || [];
+        var nvdCve = results[1] ? [results[1]] : null;
+        lastV = { osv: osvVs, nvd: nvdCve };
+        stream(combinedAnalysis(osvVs, nvdCve, cveId), function () {
+          updatePanel(osvVs, nvdCve, cveId);
+          switchTab("vulns");
+          done();
+        });
+      }).catch(function (e) {
+        stream('<p><i class="fas fa-exclamation-triangle" style="color:var(--crit)"></i> Error: ' + esc(e.message) + '</p>', done);
+      });
+      return;
+    }
+
+    // ── NVD keyword search ────────────────────────────────────────────────
+    if (intent === "nvd") {
+      var kw = msg.replace(/^nvd\s+/i, "").trim() || msg;
+      lastQ  = kw;
+      if (!nvdKey) {
+        stream('<p><i class="fas fa-key" style="color:var(--crit)"></i> NVD requires an API key. Add it in the <strong>Sources</strong> panel on the right.</p>', done);
+        switchTab("sources");
+        return;
+      }
+      stream('<p style="color:var(--t3);font-size:12px"><i class="fas fa-spinner fa-spin" style="margin-right:5px"></i>Querying NVD for "' + esc(kw) + '" via CORS proxy…</p>', function () {});
+      fetchNVD(kw).then(function (cves) {
+        if (!cves) { stream('<p>NVD returned no results for <strong>' + esc(kw) + '</strong>.</p>', done); return; }
+        lastV = { osv: [], nvd: cves };
+        stream(nvdAnalysis(cves, kw), function () {
+          updatePanel([], cves, kw);
+          switchTab("vulns");
+          done();
+        });
+      }).catch(function (e) {
+        stream('<p><i class="fas fa-exclamation-triangle" style="color:var(--crit)"></i> ' + esc(e.message) + '</p>', done);
+      });
+      return;
+    }
+
+    // ── OSV + NVD scan ────────────────────────────────────────────────────
+    if (intent === "scan") {
+      var q2 = msg.replace(/^(analyze|check|scan|vulns? in|vulnerabilities? in|search|find|show)\s*/i, "").trim() || msg;
+      lastQ  = q2;
+      stream('<p style="color:var(--t3);font-size:12px"><i class="fas fa-spinner fa-spin" style="margin-right:5px"></i>Scanning "' + esc(q2) + '" across OSV' + (nvdKey ? " + NVD" : "") + '…</p>', function () {});
+      Promise.all([fetchOSV(q2), fetchNVD(q2)]).then(function (results) {
+        var osvVs   = results[0] || [];
+        var nvdCves = results[1];
+        lastV = { osv: osvVs, nvd: nvdCves };
+        stream(combinedAnalysis(osvVs, nvdCves, q2), function () {
+          updatePanel(osvVs, nvdCves, q2);
+          switchTab("vulns");
+          done();
+        });
+      }).catch(function (e) {
+        stream('<p><i class="fas fa-exclamation-triangle" style="color:var(--crit)"></i> ' + esc(e.message) + '</p>', done);
+      });
+      return;
+    }
+
+    // ── Follow-up on last query ────────────────────────────────────────────
+    if (intent === "followup" && lastV) {
+      var lm = msg.toLowerCase();
+      if (lm.indexOf("mitig") !== -1 || lm.indexOf("fix") !== -1 || lm.indexOf("remediat") !== -1) {
+        var allText = "";
+        if (lastV.osv) { for (var oi = 0; oi < lastV.osv.length; oi++) allText += " " + (lastV.osv[oi].details || "") + " " + (lastV.osv[oi].summary || ""); }
+        if (lastV.nvd) { for (var ni = 0; ni < lastV.nvd.length; ni++) allText += " " + (nvdDesc(lastV.nvd[ni]) || ""); }
+        var dt2 = classifyTypes(allText);
+        if (dt2.length) {
+          var r2 = '<h3>Mitigation for ' + esc(lastQ) + '</h3>';
+          for (var mi3 = 0; mi3 < dt2.length; mi3++) r2 += mitiCard(dt2[mi3], lastQ);
+          stream(r2, done);
+        } else {
+          stream('<p>No specific vuln type detected in the last result. Try <code>mitigate rce</code> or <code>mitigate xss</code> directly.</p>', done);
+        }
+        return;
+      }
+      if (lm.indexOf("json") !== -1 || lm.indexOf("export") !== -1) {
+        stream('<p>JSON data is in the <strong>JSON</strong> tab (top-right). Use <strong>Copy</strong> to export.</p>', function () { switchTab("json"); done(); });
+        return;
+      }
+      stream('<p>Current data: <strong>' + esc(lastQ) + '</strong>. You can ask: <code>mitigation</code> or <code>json</code></p>', done);
+      return;
+    }
+
+    // ── Fallback ──────────────────────────────────────────────────────────
+    stream('<p>Try: <code>analyze log4j</code>, <code>CVE-2021-44228</code>, <code>nvd openssl</code>, or <code>mitigate rce</code></p>', done);
+  }
+
+  // ── EVENTS ───────────────────────────────────────────────────────────────
+  sendBtn.addEventListener("click", function () { if (!busy) doHandle(inputEl.value); });
+  inputEl.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); if (!busy) doHandle(inputEl.value); }
+  });
+  inputEl.addEventListener("input", function () {
+    inputEl.style.height = "auto";
+    inputEl.style.height = Math.min(inputEl.scrollHeight, 100) + "px";
+  });
+
+  // ── WELCOME MESSAGE ───────────────────────────────────────────────────────
+  stream(
+    '<h2><i class="fas fa-shield-halved" style="color:var(--ac);font-size:14px"></i> CVE Security AI Analyst</h2>' +
+    '<p>Dual-source vulnerability intelligence via <strong>OSV.dev</strong> (free, live) and <strong>NVD/NIST</strong> (needs free API key).</p>' +
+    '<p>Query examples:</p>' +
+    '<ul>' +
+    '<li><code>CVE-2021-44228</code> — full CVE lookup</li>' +
+    '<li><code>analyze log4j</code> — package scan</li>' +
+    '<li><code>nvd openssl</code> — NVD keyword search</li>' +
+    '<li><code>mitigate rce</code> — mitigation playbook</li>' +
+    '</ul>' +
+    '<p style="font-size:11px;color:var(--t3)">For NVD data, add your free API key in the <strong>Sources</strong> tab →</p>',
+    function () {}
+  );
+
+  inputEl.focus();
+})();
+</script>
+</body>
+</html>
